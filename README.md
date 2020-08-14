@@ -1,2 +1,0 @@
-# dist
-portfolio build
