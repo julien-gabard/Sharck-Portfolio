@@ -66,46 +66,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // Sending the email if no errors
   if (empty($errors)) {
-    $date = date('j, F Y h:i A');
 
-    $emailBody = "
-    <html>
-    <head>
-      <title>$email vous contacte</title>
-    </head>
-    <body style=\"background-color:#fafafa;\">
-      <div style=\"padding:20px;\">
-        Date: <span style=\"color:#888\">$date</span>
-        <br>
-        Nom: <span style=\"color:#888\>$lastName</span>
-        <br>
-        Prénom: <span style=\"color:#888\>$firstName</span>
-        <br>
-        Téléphone: <span style=\"color:#888\>$phone</span>
-        <br>
-        Email: <span style=\"color:#888\">$email</span>
-        <br>
-        Message: <div style=\"color:#888\">$msg</div>
-      </div>
-    </body>
-    </html>
-    ";
+    // Configuration et date en francais
+    setlocale(LC_TIME, 'fr_FR.utf8','fra');
+    $date = strftime('%A %d %B %Y, %H:%M');
 
-    $to = 'juliengabard.pros@gmail.com'; // Adresse mail du destinataire
-    $from = $email; // Adresse mail de l'expediteur
-    $subject = 'Vous à contacter'; // Objet du mail
-    $message = $emailBody; // Message du mail
+    // L'adresse de destination
+    $to = 'juliengabard.pros@gmail.com';
 
-    // L'en-tête content-type HTML
-    $headers  = 'MIME-Version: 1.0' . "\r\n";
-    $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+    // L'objet du mail
+    $subject = 'Vous à contacter';
 
-    // En-tête du courrier
-    $headers .= 'From: '.$from."\r\n".
-    'Reply-To: '.$from."\r\n" .
-    'X-Mailer: PHP/' . phpversion();
+    // Passe à la ligne quand arriver a 70 caractères
+    $msg = wordwrap($msg, 70, "\r\n");
 
-    if (mail($to, $subject, $message, $headers)) {
+    // Contenue du mail en HTML
+    $message = '
+      <html>
+        <body>
+          <h1>' . $lastName . ' ' . $firstName . '</h1>
+          <p><strong>Le : </strong>' . $date . '</p>
+          ' . $msg . '
+          <p><strong>Téléphone : </strong>' . $phone . '</p>
+        </body>
+      </html>
+    ';
+
+    // en-tête Content-type pour l'HTML
+    $headers[] = 'MIME-Version: 1.0';
+    $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+
+    // En-têtes additionnels
+    $headers[] = 'To: juliengabard.pros@gmail.com';
+    $headers[] = 'From: ' . $email;
+
+    if (mail($to, $subject, $message, implode("\r\n", $headers))) {
       $sent = true;
     }
   }
